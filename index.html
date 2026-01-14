@@ -621,6 +621,7 @@
         <div class="tabs">
             <button class="tab active" onclick="switchTab('schedule')">📅 Schedule</button>
             <button class="tab" onclick="switchTab('age')">🎂 Age & Birthday</button>
+            <button class="tab" onclick="switchTab('health')">🩺 Health</button>
         </div>
 
         <!-- Schedule Tab -->
@@ -757,6 +758,74 @@
                 </div>
             </div>
         </div>
+
+        <!-- Health Tab -->
+        <div id="healthTab" class="tab-content">
+            <!-- Medicine Log -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">💊</span>
+                    <h2 class="card-title">Medicine Log</h2>
+                </div>
+                <div class="input-group">
+                    <label for="medicineName">Medicine Name</label>
+                    <input type="text" id="medicineName" placeholder="e.g., Tylenol, Vitamin D" style="padding: 12px 16px; border: 2px solid var(--light-blue); border-radius: 12px; font-size: 1rem; font-family: 'Nunito', sans-serif; background: var(--sky); color: var(--navy); font-weight: 600; width: 100%; box-sizing: border-box;">
+                </div>
+                <div class="input-group">
+                    <label for="medicineTime">Time Given</label>
+                    <input type="time" id="medicineTime">
+                </div>
+                <button class="btn" onclick="addMedicine()">Log Medicine</button>
+
+                <div id="medicineLog" style="margin-top: 24px;"></div>
+            </div>
+
+            <!-- Weight Tracking -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">⚖️</span>
+                    <h2 class="card-title">Weight Tracking</h2>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="weightDate">Date</label>
+                        <input type="date" id="weightDate" style="padding: 12px 16px; border: 2px solid var(--light-blue); border-radius: 12px; font-size: 1rem; font-family: 'Nunito', sans-serif; background: var(--sky); color: var(--navy); font-weight: 600; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <div class="input-group">
+                        <label for="weightAmount">Weight (kg)</label>
+                        <input type="number" id="weightAmount" step="0.01" min="0" placeholder="5.5">
+                    </div>
+                </div>
+                <button class="btn" onclick="addWeight()">Log Weight</button>
+
+                <div id="weightLog" style="margin-top: 24px;"></div>
+            </div>
+
+            <!-- Next Doctor Appointment -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">👨‍⚕️</span>
+                    <h2 class="card-title">Next Doctor Appointment</h2>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="appointmentDate">Date</label>
+                        <input type="date" id="appointmentDate" style="padding: 12px 16px; border: 2px solid var(--light-blue); border-radius: 12px; font-size: 1rem; font-family: 'Nunito', sans-serif; background: var(--sky); color: var(--navy); font-weight: 600; width: 100%; box-sizing: border-box;">
+                    </div>
+                    <div class="input-group">
+                        <label for="appointmentTime">Time</label>
+                        <input type="time" id="appointmentTime">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="appointmentNotes">Notes (optional)</label>
+                    <input type="text" id="appointmentNotes" placeholder="e.g., 4-month checkup" style="padding: 12px 16px; border: 2px solid var(--light-blue); border-radius: 12px; font-size: 1rem; font-family: 'Nunito', sans-serif; background: var(--sky); color: var(--navy); font-weight: 600; width: 100%; box-sizing: border-box;">
+                </div>
+                <button class="btn" onclick="saveAppointment()">Save Appointment</button>
+
+                <div id="appointmentDisplay" style="margin-top: 24px;"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -771,6 +840,9 @@
         };
 
         let feedings = [];
+        let medicines = [];
+        let weights = [];
+        let appointment = null;
 
         // Load feedings from localStorage
         function loadFeedings() {
@@ -783,6 +855,67 @@
         // Save feedings to localStorage
         function saveFeedings() {
             localStorage.setItem('paulFeedings', JSON.stringify(feedings));
+        }
+
+        // Load medicines from localStorage
+        function loadMedicines() {
+            const saved = localStorage.getItem('paulMedicines');
+            if (saved) {
+                medicines = JSON.parse(saved);
+            }
+        }
+
+        // Save medicines to localStorage
+        function saveMedicines() {
+            localStorage.setItem('paulMedicines', JSON.stringify(medicines));
+        }
+
+        // Load weights from localStorage
+        function loadWeights() {
+            const saved = localStorage.getItem('paulWeights');
+            if (saved) {
+                weights = JSON.parse(saved);
+            }
+        }
+
+        // Save weights to localStorage
+        function saveWeights() {
+            localStorage.setItem('paulWeights', JSON.stringify(weights));
+        }
+
+        // Load appointment from localStorage
+        function loadAppointment() {
+            const saved = localStorage.getItem('paulAppointment');
+            if (saved) {
+                appointment = JSON.parse(saved);
+            }
+        }
+
+        // Save appointment to localStorage
+        function saveAppointment() {
+            const dateInput = document.getElementById('appointmentDate').value;
+            const timeInput = document.getElementById('appointmentTime').value;
+            const notesInput = document.getElementById('appointmentNotes').value;
+
+            if (!dateInput) {
+                alert('Please enter appointment date');
+                return;
+            }
+
+            appointment = {
+                date: dateInput,
+                time: timeInput || '',
+                notes: notesInput || '',
+                timestamp: new Date().getTime()
+            };
+
+            localStorage.setItem('paulAppointment', JSON.stringify(appointment));
+            displayAppointment();
+            
+            // Clear inputs
+            document.getElementById('appointmentDate').value = '';
+            document.getElementById('appointmentTime').value = '';
+            document.getElementById('appointmentNotes').value = '';
         }
 
         // Tab switching
@@ -803,6 +936,11 @@
             } else if (tabName === 'age') {
                 document.getElementById('ageTab').classList.add('active');
                 updateAgeDisplay();
+            } else if (tabName === 'health') {
+                document.getElementById('healthTab').classList.add('active');
+                displayMedicineLog();
+                displayWeightLog();
+                displayAppointment();
             }
         }
 
@@ -1103,9 +1241,188 @@
             document.getElementById('avgMl').textContent = avgMl;
         }
 
+        // Medicine log functions
+        function addMedicine() {
+            const nameInput = document.getElementById('medicineName').value;
+            const timeInput = document.getElementById('medicineTime').value;
+
+            if (!nameInput || !timeInput) {
+                alert('Please fill in medicine name and time');
+                return;
+            }
+
+            const medicine = {
+                name: nameInput,
+                time: timeInput,
+                timestamp: new Date().getTime()
+            };
+
+            medicines.push(medicine);
+            medicines.sort((a, b) => {
+                const [aH, aM] = a.time.split(':').map(Number);
+                const [bH, bM] = b.time.split(':').map(Number);
+                return (aH * 60 + aM) - (bH * 60 + bM);
+            });
+
+            saveMedicines();
+            displayMedicineLog();
+
+            // Clear time input only
+            document.getElementById('medicineTime').value = '';
+        }
+
+        function deleteMedicine(timestamp) {
+            medicines = medicines.filter(m => m.timestamp !== timestamp);
+            saveMedicines();
+            displayMedicineLog();
+        }
+
+        function displayMedicineLog() {
+            const logDiv = document.getElementById('medicineLog');
+
+            if (medicines.length === 0) {
+                logDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💊</div>
+                        <p>No medicines logged yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by medicine name
+            const grouped = {};
+            medicines.forEach(m => {
+                if (!grouped[m.name]) {
+                    grouped[m.name] = [];
+                }
+                grouped[m.name].push(m);
+            });
+
+            logDiv.innerHTML = Object.keys(grouped).map(name => `
+                <div style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 2px solid var(--light-blue);">
+                    <div style="font-family: 'Quicksand', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--baby-blue); margin-bottom: 12px;">
+                        💊 ${name}
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--navy); font-weight: 600; margin-bottom: 8px;">
+                        Given ${grouped[name].length} time${grouped[name].length > 1 ? 's' : ''}
+                    </div>
+                    ${grouped[name].map(m => `
+                        <div class="log-entry" style="margin-bottom: 8px;">
+                            <div class="log-info">
+                                <div class="log-time">⏰ ${m.time}</div>
+                            </div>
+                            <button class="btn btn-small btn-delete" onclick="deleteMedicine(${m.timestamp})">Delete</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        // Weight tracking functions
+        function addWeight() {
+            const dateInput = document.getElementById('weightDate').value;
+            const weightInput = document.getElementById('weightAmount').value;
+
+            if (!dateInput || !weightInput) {
+                alert('Please fill in both date and weight');
+                return;
+            }
+
+            const weight = {
+                date: dateInput,
+                weight: parseFloat(weightInput),
+                timestamp: new Date().getTime()
+            };
+
+            weights.push(weight);
+            weights.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            saveWeights();
+            displayWeightLog();
+
+            // Clear inputs
+            document.getElementById('weightDate').value = '';
+            document.getElementById('weightAmount').value = '';
+        }
+
+        function deleteWeight(timestamp) {
+            weights = weights.filter(w => w.timestamp !== timestamp);
+            saveWeights();
+            displayWeightLog();
+        }
+
+        function displayWeightLog() {
+            const logDiv = document.getElementById('weightLog');
+
+            if (weights.length === 0) {
+                logDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚖️</div>
+                        <p>No weights logged yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            logDiv.innerHTML = weights.map(w => `
+                <div class="log-entry">
+                    <div class="log-info">
+                        <div class="log-time">📅 ${new Date(w.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                        <div class="log-amount">${w.weight} kg</div>
+                    </div>
+                    <button class="btn btn-small btn-delete" onclick="deleteWeight(${w.timestamp})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        // Appointment display function
+        function displayAppointment() {
+            const displayDiv = document.getElementById('appointmentDisplay');
+
+            if (!appointment) {
+                displayDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <p>No appointment scheduled</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const appointmentDate = new Date(appointment.date);
+            const now = new Date();
+            const daysUntil = Math.ceil((appointmentDate - now) / (1000 * 60 * 60 * 24));
+
+            displayDiv.innerHTML = `
+                <div style="background: linear-gradient(135deg, var(--sky), white); padding: 24px; border-radius: 16px; border: 2px solid var(--baby-blue);">
+                    <div style="font-family: 'Quicksand', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--baby-blue); margin-bottom: 12px;">
+                        📅 ${appointmentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                    </div>
+                    ${appointment.time ? `<div style="font-size: 1.1rem; color: var(--navy); font-weight: 600; margin-bottom: 8px;">⏰ ${appointment.time}</div>` : ''}
+                    ${appointment.notes ? `<div style="font-size: 1rem; color: var(--text); margin-bottom: 12px;">${appointment.notes}</div>` : ''}
+                    <div style="font-size: 1.2rem; font-weight: 700; color: ${daysUntil < 0 ? '#FF6B6B' : 'var(--mint)'}; margin-top: 12px;">
+                        ${daysUntil < 0 ? 'Appointment passed' : daysUntil === 0 ? '🎯 Today!' : `In ${daysUntil} day${daysUntil > 1 ? 's' : ''}`}
+                    </div>
+                    <button class="btn btn-small btn-delete" onclick="deleteAppointment()" style="margin-top: 16px;">Clear Appointment</button>
+                </div>
+            `;
+        }
+
+        function deleteAppointment() {
+            if (confirm('Are you sure you want to clear this appointment?')) {
+                appointment = null;
+                localStorage.removeItem('paulAppointment');
+                displayAppointment();
+            }
+        }
+
         // Initialize
         window.addEventListener('load', () => {
             loadFeedings(); // Load saved feedings first
+            loadMedicines(); // Load medicines
+            loadWeights(); // Load weights
+            loadAppointment(); // Load appointment
             setDefaultTime();
             displayFeedings();
             updateStats();
