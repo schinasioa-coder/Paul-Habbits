@@ -663,33 +663,42 @@
             }
 
             .birthday-value {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
 
             .birthday-label {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
 
             .birthday-box {
-                padding: 20px;
+                padding: 16px 10px;
+            }
+
+            .birthday-box-icon {
+                font-size: 2rem;
+                margin-bottom: 8px;
             }
 
             .birthday-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
             }
 
             .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
             }
 
             .stat-box {
-                padding: 16px;
+                padding: 14px 10px;
             }
 
             .stat-value {
-                font-size: 1.6rem;
+                font-size: 1.4rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
             }
 
             .tabs {
@@ -1302,8 +1311,14 @@
         }
 
         function formatMinutesToTime(minutes) {
-            const h = Math.floor(minutes / 60);
-            const m = minutes % 60;
+            // Handle times past midnight
+            let displayMinutes = minutes;
+            if (minutes >= 24 * 60) {
+                displayMinutes = minutes % (24 * 60);
+            }
+            
+            const h = Math.floor(displayMinutes / 60);
+            const m = displayMinutes % 60;
             return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
         }
 
